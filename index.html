@@ -3,42 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOZA AI | Final Fix</title>
+    <title>NOZA AI | Stable Build</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root { --bg: #020408; --sidebar: #050812; --accent: #ffffff; --border: rgba(255, 255, 255, 0.1); }
         * { box-sizing: border-box; outline: none; }
         body, html { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
 
-        /* КУРСОР */
+        /* БЕЛЫЙ КУРСОР — ПОЛНОСТЬЮ ПРОЗРАЧЕН ДЛЯ КЛИКОВ */
         #cursor-dot, #cursor-outline { pointer-events: none !important; position: fixed; z-index: 100000; transform: translate(-50%, -50%); border-radius: 50%; }
         #cursor-dot { width: 6px; height: 6px; background: #fff; }
-        #cursor-outline { width: 30px; height: 30px; border: 1.5px solid rgba(255, 255, 255, 0.4); transition: 0.15s; }
+        #cursor-outline { width: 30px; height: 30px; border: 1.5px solid rgba(255, 255, 255, 0.4); transition: 0.1s; }
 
-        /* ЭКРАНЫ */
+        /* ЭКРАН ЗАПУСКА */
         #landing { position: fixed; inset: 0; z-index: 10000; background: #020408; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
         .hero-title { font-size: 80px; font-weight: 800; margin-bottom: 30px; letter-spacing: -2px; }
-        .hero-btn { padding: 18px 45px; font-size: 18px; font-weight: 600; background: #fff; color: #000; border: none; border-radius: 50px; cursor: pointer; }
+        .hero-btn { padding: 18px 45px; font-size: 18px; font-weight: 600; background: #fff; color: #000; border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
+        .hero-btn:hover { transform: scale(1.05); }
 
+        /* ПРИЛОЖЕНИЕ */
         #app { display: none; height: 100vh; width: 100%; display: flex; opacity: 0; transition: 0.5s; }
-        .sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; }
+        .sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 10; }
         .sidebar-logo { font-weight: 800; font-size: 24px; margin-bottom: 30px; }
-        .new-chat-btn { border: 1px solid #fff; color: #fff; background: transparent; padding: 12px; border-radius: 12px; font-weight: 600; margin-bottom: 20px; cursor: pointer; }
+        .new-chat-btn { border: 1px solid #fff; color: #fff; background: transparent; padding: 12px; border-radius: 12px; font-weight: 600; margin-bottom: 20px; cursor: pointer; transition: 0.2s; }
+        .new-chat-btn:hover { background: #fff; color: #000; }
+        
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); font-size: 13px; margin-bottom: 8px; cursor: pointer; }
-        .chat-item.active { border-color: #fff; border: 1px solid #fff; background: rgba(255,255,255,0.08); }
+        .chat-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); font-size: 13px; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .chat-item.active { border-color: #fff; background: rgba(255,255,255,0.08); }
 
-        main { flex: 1; display: flex; flex-direction: column; background: #020408; position: relative; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 25px; scroll-behavior: smooth; }
-        .message { max-width: 850px; width: 100%; margin: 0 auto; display: flex; gap: 20px; animation: fadeInUp 0.3s ease; }
+        /* ОКНО ЧАТА */
+        main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 5; background: #020408; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+        .message { max-width: 800px; width: 100%; margin: 0 auto; display: flex; gap: 15px; animation: fadeInUp 0.3s ease; }
         .msg-avatar { width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 1px solid var(--border); flex-shrink: 0; }
         .msg-ai { background: #fff; color: #000; }
         .msg-text { line-height: 1.6; color: #d1d9e6; white-space: pre-wrap; font-size: 16px; user-select: text; }
 
-        .input-area { padding: 20px 10% 40px; }
-        .input-box { max-width: 850px; margin: 0 auto; background: #11141b; border: 1px solid var(--border); border-radius: 18px; padding: 5px 15px; display: flex; align-items: center; }
-        input { flex: 1; background: transparent; border: none; color: #fff; padding: 15px; font-size: 16px; cursor: text; }
-        .send-btn { background: #fff; border: none; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        /* ЗОНА ВВОДА */
+        .input-area { padding: 20px 10% 40px; position: relative; z-index: 5000; }
+        .input-box { max-width: 800px; margin: 0 auto; background: #11141b; border: 1px solid var(--border); border-radius: 15px; padding: 5px 15px; display: flex; align-items: center; }
+        
+        input#userInput { 
+            flex: 1; background: transparent; border: none; color: #fff; 
+            padding: 15px; outline: none; font-size: 16px; 
+            cursor: text !important; pointer-events: auto !important;
+        }
+        
+        .send-btn { background: #fff; border: none; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -65,7 +77,7 @@
                 <div class="input-box">
                     <input type="text" id="userInput" placeholder="Напишите сообщение..." autocomplete="off">
                     <button class="send-btn" onclick="handleSend()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
                     </button>
                 </div>
             </div>
@@ -73,7 +85,7 @@
     </div>
 
     <script>
-        // КЛЮЧ И ЛОГИКА
+        // API КЛЮЧ (Base64)
         const _B = "Z3NrX2drU0h6S2o2Tjhzblo1WEVlWTdXR2R5YnJvRlk4MENlWkx6T0pYNmZJemxuMUJMS0ZNajA=";
         const KEY = atob(_B).slice(0, -1);
         let chats = [];
@@ -87,12 +99,12 @@
                 app.style.display = 'flex';
                 setTimeout(() => app.style.opacity = '1', 50);
                 if(!chats.length) createNewChat();
-            }, 400);
+            }, 500);
         }
 
         function createNewChat() {
             const id = Date.now();
-            chats.unshift({id, title: "Новый диалог", msgs: [{role:'assistant', content:'Система готова. Напишите ваш вопрос.'}]});
+            chats.unshift({id, title: "Новый диалог", msgs: [{role:'assistant', content:'Система NOZA AI онлайн. Готова к работе.'}]});
             curId = id;
             render();
         }
@@ -103,19 +115,20 @@
             if(!txt || !curId) return;
 
             const chat = chats.find(c => c.id === curId);
-            if(chat.title === "Новый диалог") chat.title = txt.slice(0, 20);
+            if(chat.title === "Новый диалог") chat.title = txt.slice(0, 15);
+            
             chat.msgs.push({role: 'user', content: txt});
             inp.value = "";
             const aiIdx = chat.msgs.push({role: 'assistant', content: 'Думаю...'}) - 1;
             render();
 
             try {
-                // ПРЯМОЙ ЗАПРОС (Расширение CORS должно быть ON)
                 const response = await fetch("https://groq.com", {
                     method: "POST",
                     headers: {
                         "Authorization": "Bearer " + KEY,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify({
                         model: "llama3-8b-8192",
@@ -123,16 +136,12 @@
                     })
                 });
 
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.error ? errData.error.message : 'Ошибка API');
-                }
+                if (!response.ok) throw new Error('Ошибка сети');
 
                 const data = await response.json();
                 chat.msgs[aiIdx].content = data.choices[0].message.content;
             } catch(e) {
-                chat.msgs[aiIdx].content = "ОШИБКА: " + e.message + ". Убедитесь, что в расширении CORS нажата кнопка и она оранжевая.";
-                console.error(e);
+                chat.msgs[aiIdx].content = "ОШИБКА: " + e.message + ". Проверьте расширение CORS (должно быть ON) и обновите страницу.";
             }
             render();
         }
@@ -140,18 +149,26 @@
         function render() {
             const chat = chats.find(c => c.id === curId);
             if(!chat) return;
-            document.getElementById('chatList').innerHTML = chats.map(c => `<div class="chat-item ${c.id===curId?'active':''}" onclick="selectChat(${c.id})">${c.title}</div>`).join('');
-            document.getElementById('chatWindow').innerHTML = chat.msgs.map(m => `<div class="message"><div class="msg-avatar ${m.role==='assistant'?'msg-ai':'msg-user'}">${m.role==='assistant'?'NZ':'U'}</div><div class="msg-text">${m.content}</div></div>`).join('');
+            document.getElementById('chatList').innerHTML = chats.map(c => `
+                <div class="chat-item ${c.id===curId?'active':''}" onclick="selectChat(${c.id})">${c.title}</div>
+            `).join('');
+            document.getElementById('chatWindow').innerHTML = chat.msgs.map(m => `
+                <div class="message">
+                    <div class="msg-avatar ${m.role==='assistant'?'msg-ai':'msg-user'}">${m.role==='assistant'?'NZ':'U'}</div>
+                    <div class="msg-text">${m.content}</div>
+                </div>
+            `).join('');
             document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
         }
 
         function selectChat(id) { curId = id; render(); }
         document.getElementById('userInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSend(); });
 
-        // КУРСОР
-        const dot = document.getElementById('cursor-dot'), outline = document.getElementById('cursor-outline');
+        // БЕЛЫЙ КУРСОР
+        const dot = document.getElementById('cursor-dot');
+        const outline = document.getElementById('cursor-outline');
         let mx=0, my=0, ox=0, oy=0;
-        document.onmousemove = e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; };
+        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
         function tick() { ox += (mx - ox) * 0.15; oy += (my - oy) * 0.15; outline.style.left = ox + 'px'; outline.style.top = oy + 'px'; requestAnimationFrame(tick); }
         tick();
     </script>
